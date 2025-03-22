@@ -10,7 +10,7 @@ require "graphql/client/http"
         HTTP = GraphQL::Client::HTTP.new("https://api.github.com/graphql") do
           def headers(context)
             {
-              "Authorization": "Bearer ",
+              "Authorization": "Bearer #{ENV["GITHUB_TOKEN"]}",
             }
           end
         end

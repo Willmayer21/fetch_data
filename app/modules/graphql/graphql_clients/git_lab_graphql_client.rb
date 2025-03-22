@@ -7,7 +7,7 @@ module Graphql
       HTTP = GraphQL::Client::HTTP.new("https://gitlab.com/api/graphql") do
         def headers(context)
           {
-            "Authorization" => "Bearer ",
+            "Authorization" => "Bearer #{ENV["GITLAB_TOKEN"]}",
             "Content-Type" => "application/json"
           }
         end

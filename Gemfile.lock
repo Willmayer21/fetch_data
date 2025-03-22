@@ -379,6 +379,7 @@ DEPENDENCIES
   brakeman
   capybara
   debug
+  dotenv
   graphql-client
   importmap-rails
   jbuilder

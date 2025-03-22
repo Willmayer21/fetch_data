@@ -25,10 +25,10 @@ module Graphql
         }
           GRAPHQL
 
-      def self.fetch(owner, repo, first)
+      def self.fetch(full_path, first)
         response = Client.query(
           MergeRequestsQuery,
-          variables: { fullPath: owner/repo, first: first }
+          variables: { fullPath: full_path, first: first }
         )
 
         if response.errors.any?
