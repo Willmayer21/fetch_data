@@ -1,7 +1,7 @@
 
 module Graphql
   module GraphqlQueries
-    class GitLabMergeRequestsQuery
+    class GitLabPullRequestsQuery
       include Graphql::GraphqlClients::GitLabGraphqlClient
 
       MergeRequestsQuery = Client.parse <<~GRAPHQL

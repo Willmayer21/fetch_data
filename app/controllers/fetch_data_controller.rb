@@ -4,8 +4,8 @@ class FetchDataController < ApplicationController
     case params["source"]
     when "gitlab"
       case params["type"]
-      when "merge_requests"
-        data = Graphql::GraphqlQueries::GitLabMergeRequestsQuery.fetch("#{params["org"]}/#{params["repo"]}", number)
+      when "pull_requests"
+        data = Graphql::GraphqlQueries::GitLabPullRequestsQuery.fetch("#{params["org"]}/#{params["repo"]}", number)
       else data = "error"
       end
     when "github"
@@ -31,9 +31,6 @@ class FetchDataController < ApplicationController
     else
       render json: data
     end
-
-
-
   end
 end
 
