@@ -5,7 +5,7 @@ class FetchDataController < ApplicationController
     when "gitlab"
       case params["type"]
       when "merge_requests"
-        data = Graphql::GraphqlQueries::GitLabMergeRequestsQuery.fetch("#{params["full_path"]}", number)
+        data = Graphql::GraphqlQueries::GitLabMergeRequestsQuery.fetch("#{params["org"]}/#{params["repo"]}", number)
       else data = "error"
       end
     when "github"
@@ -19,23 +19,25 @@ class FetchDataController < ApplicationController
     else data = "error"
     end
 
-    if data != "error"
-      render json: data
-    else
-      not_found!
-    end
-
-
-    # if data = "error"
-    #   not_found!
-    # else
+    # if data != "error"
     #   render json: data
+    # else
+    #   not_found!
     # end
+
+
+    if data == "error"
+      not_found!
+    else
+      render json: data
+    end
 
 
 
   end
 end
+
+# full_path=gitlab-org/gitlab
 
 # add suport for bitbucket
 

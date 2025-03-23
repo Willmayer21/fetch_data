@@ -35,13 +35,8 @@ module Graphql
           raise "GraphQL Error: #{response.errors[:data].join(', ')}"
         end
 
-        response.data.project.merge_requests.edges.map do |mr|
-          {
-            number: mr.node.iid,
-            title: mr.node.title,
-            author: mr.node.author.username
-          }
-        end
+        response
+
       end
     end
   end
