@@ -14,5 +14,7 @@ Rails.application.routes.draw do
   # root "posts#index"
   get "fetch_data", to: "fetch_data#index"
   get "api", to: "api#index"
-  get "api/call", to: "api#call"
+  get "api/fetch", to: "api#fetch"
+  get "api/fetch_project_name_with_id", to: "api#fetch_project_name_with_id"
+  get "api/fetch_project_id_with_name", to: "api#fetch_project_id_with_name"
 end
