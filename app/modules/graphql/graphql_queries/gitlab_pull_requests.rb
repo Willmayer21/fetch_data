@@ -1,7 +1,7 @@
 
 module Graphql
   module GraphqlQueries
-    class GitLabPullRequestsQuery
+    class GitlabPullRequests
       include Graphql::GraphqlClients::GitLabGraphqlClient
 
       MergeRequestsQuery = Client.parse <<~GRAPHQL
@@ -25,7 +25,8 @@ module Graphql
         }
           GRAPHQL
 
-      def self.fetch(full_path, first)
+      def self.fetch(owner, repo, first)
+        full_path = [ owner, repo ].join("/")
         response = Client.query(
           MergeRequestsQuery,
           variables: { fullPath: full_path, first: first }
@@ -35,9 +36,11 @@ module Graphql
           raise "GraphQL Error: #{response.errors[:data].join(', ')}"
         end
 
-        response
+        response.data.project.merge_requests.edges
 
       end
     end
   end
 end
+
+# full_path=gitlab-org/gitlab

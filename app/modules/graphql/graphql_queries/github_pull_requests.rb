@@ -1,7 +1,7 @@
 
 module Graphql
   module GraphqlQueries
-    class GitHubPullRequestsQuery
+    class GithubPullRequests
       include Graphql::GraphqlClients::GitHubGraphqlClient
 
       PullRequestsQuery = Client.parse <<~GRAPHQL
@@ -38,7 +38,7 @@ module Graphql
 
 
 
-        response
+        response.data.repository.pull_requests.edges
 
 
       end

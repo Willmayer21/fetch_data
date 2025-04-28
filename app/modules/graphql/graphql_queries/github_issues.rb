@@ -1,7 +1,7 @@
 
 module Graphql
   module GraphqlQueries
-    class GitHubIssuesQuery
+    class GithubIssues
       include Graphql::GraphqlClients::GitHubGraphqlClient
 
       IssuesQuery = Client.parse <<~GRAPHQL
@@ -41,7 +41,20 @@ module Graphql
           raise "GraphQL Error: #{response.errors[:data].join(', ')}"
         end
 
-        response
+
+       response.data.repository.issues.edges
+
+        # jojo.map do |el|
+        #   puts "#{el.number}"
+        # end
+
+        # response.data.repository.issues.edges.map do |edge|
+        #   edge.node
+        # end
+
+
+
+        # response.data.repository.issues.edges.map { |edge| edge.node }
 
       end
     end
