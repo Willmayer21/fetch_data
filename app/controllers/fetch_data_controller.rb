@@ -25,6 +25,7 @@ class FetchDataController < ApplicationController
     #   not_found!
     # end
 
+    # http://localhost:3000/fetch_data?number=10&type=pull_requests&org=gitlab&repo=gitlab&source=gitlab
 
     if data == "error"
       not_found!

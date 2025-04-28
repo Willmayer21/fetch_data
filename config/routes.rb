@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "api/index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -12,4 +13,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   get "fetch_data", to: "fetch_data#index"
+  get "api", to: "api#index"
+  get "api/call", to: "api#call"
 end
