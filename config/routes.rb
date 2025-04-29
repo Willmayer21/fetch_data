@@ -17,4 +17,8 @@ Rails.application.routes.draw do
   get "api/fetch", to: "api#fetch"
   get "api/fetch_project_name_with_id", to: "api#fetch_project_name_with_id"
   get "api/fetch_project_id_with_name", to: "api#fetch_project_id_with_name"
+  get "api/fetch_project", to: "api#fetch_project"
+  get "api/fetch_project_pull_request", to: "api#fetch_project_pull_request"
+  get "api/fetch_pull_request_event", to: "api#fetch_pull_request_event"
+  get "my_api/merge_requests", to: "my_api#merge_requests"
 end

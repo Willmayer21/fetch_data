@@ -1,9 +1,54 @@
 require "net/http"
 
 class ApiController < ApplicationController
+class NoValidInput < StandardError; end
+
   def index
-    jo = params["source"]
     render json: jo
+  end
+
+def fetch_pull_request_event
+  # uri = URI("https://gitlab.com/api/v4/projects/69360696/merge_requests/3/resource_state_events")
+  uri = URI("https://gitlab.com/api/v4/projects/69360696/merge_requests/3")
+
+  call_result = api_call(uri)
+
+  render json: call_result
+end
+
+  def fetch_project
+    if params["id"].nil? && params["name"].nil?
+      raise NoValidInput
+    elsif !params["id"].nil?
+      data = fetch_project_name_with_id
+    elsif !params["name"].nil?
+      data = fetch_project_id_with_name
+    end
+
+    if !data.nil? && params["type"] == "pull_request"
+      pr = fetch_project_pull_request(data)
+    end
+
+    if !pr.nil?
+      data = pr
+    end
+
+    render json: data
+  end
+
+
+  def fetch_project_pull_request(data)
+    uri = URI("https://gitlab.com/api/v4/projects/#{data[:id]}/merge_requests")
+    call_result = api_call(uri)
+    call_result.map { |el| el["id"] }
+    call_result.map do |el|
+      { id: el["id"],
+        iid: el["iid"],
+        title: el["title"],
+        state: el["state"],
+        project_id: el["project_id"]
+      }
+    end
   end
 
   def fetch_project_name_with_id
@@ -13,8 +58,10 @@ class ApiController < ApplicationController
 
     call_result = api_call(uri)
 
-    project_name = call_result["path_with_namespace"]
-    render json: project_name
+    project_details = {
+      id: call_result["id"],
+      name: call_result["path_with_namespace"]
+    }
   end
 
   def fetch_project_id_with_name
@@ -25,8 +72,10 @@ class ApiController < ApplicationController
 
     call_result = api_call(uri)
 
-    project_id = call_result["id"]
-    render json: project_id
+    project_details = {
+      id: call_result["id"],
+      name: call_result["path_with_namespace"]
+    }
   end
 
   def api_call(uri)

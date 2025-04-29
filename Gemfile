@@ -2,7 +2,9 @@ source "https://rubygems.org"
 
 gem "graphql-client"
 
-gem "dotenv", groups: [:development, :test]
+gem "dotenv", groups: [ :development, :test ]
+
+gem "pry"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.2"
