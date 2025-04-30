@@ -1,30 +1,51 @@
+require "net/http"
+
 class MyApiController < ApplicationController
-  def merge_requests
-    uri_merge_requests = URI("https://gitlab.com/api/v4/projects/#{params["project_id"]}/merge_requests/#{params["mr_number"]}")
+  class ArrayCountOver1 < StandardError; end
+  def merge_requests_events(project_id, iid)
+    uri_merge_requests = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}")
     api_response = api_call(uri_merge_requests)
     open_event = [ {
+      iid: api_response["iid"],
       occured_at: api_response["created_at"],
       actor: api_response["author"]["name"],
-      event: api_response["state"].camelize + "Event"
+      event: "OpenedEvent"
     } ]
-    uri_resource_state_events = URI("https://gitlab.com/api/v4/projects/#{params["project_id"]}/merge_requests/#{params["mr_number"]}/resource_state_events")
+    uri_resource_state_events = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}/resource_state_events")
     api_response_events = api_call(uri_resource_state_events)
 
     if api_response_events.count > 1
+      raise ArrayCountOver1
+    elsif api_response_events.count == 1
+      api_response_events.map do |el|
+        open_event.push(
+        {
+          iid: api_response["iid"],
+          occured_at: el["created_at"],
+          actor: el["user"]["name"],
+          event: el["state"].camelize + "Event"
+        })
+      end
     end
-
-    api_response_events.map do |el|
-      open_event.push(
-      {
-        occured_at: el["created_at"],
-        actor: el["user"]["name"],
-        event: el["state"].camelize + "Event"
-      })
-    end
-
-
-    render json: open_event
   end
+
+  def save_events(project_id, iid)
+   events = merge_requests_events(project_id, iid)
+   flat_events = events.flatten
+   for event in flat_events do
+    if event[:event] == "OpenedEvent"
+      MergeRequest.create(
+        idd: event[:iid],
+        actor: event[:actor],
+        occured_at: event[:occured_at]
+      )
+    end
+   end
+  end
+
+  # def create_merge_request
+
+  # end
 
   def api_call(uri)
     req = Net::HTTP::Get.new(uri)
