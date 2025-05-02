@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_30_142231) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_02_072008) do
   create_table "events", force: :cascade do |t|
     t.integer "merge_request_id"
     t.string "event_type"
@@ -22,7 +22,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_30_142231) do
   create_table "merge_requests", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "idd"
+    t.integer "iid"
     t.datetime "occured_at"
     t.string "actor"
   end

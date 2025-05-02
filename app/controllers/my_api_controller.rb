@@ -5,15 +5,17 @@ class MyApiController < ApplicationController
   def merge_requests_events(project_id, iid)
     uri_merge_requests = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}")
     api_response = api_call(uri_merge_requests)
-    open_event = [ {
-      iid: api_response["iid"],
-      occured_at: api_response["created_at"],
-      actor: api_response["author"]["name"],
-      event: "OpenedEvent"
-    } ]
+    open_event = []
+    open_event.push(
+      {
+        iid: api_response["iid"],
+        occured_at: api_response["created_at"],
+        actor: api_response["author"]["name"],
+        event: "OpenedEvent"
+      })
     uri_resource_state_events = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}/resource_state_events")
     api_response_events = api_call(uri_resource_state_events)
-
+binding.pry
     if api_response_events.count > 1
       raise ArrayCountOver1
     elsif api_response_events.count == 1
@@ -31,21 +33,36 @@ class MyApiController < ApplicationController
 
   def save_events(project_id, iid)
    events = merge_requests_events(project_id, iid)
-   flat_events = events.flatten
+   binding.pry
+    flat_events = events.flatten
    for event in flat_events do
     if event[:event] == "OpenedEvent"
-      MergeRequest.create(
-        idd: event[:iid],
-        actor: event[:actor],
-        occured_at: event[:occured_at]
-      )
+      create_mr(event)
+      mr = merge_request(event)
+      create_event(event, mr)
     end
    end
   end
 
-  # def create_merge_request
+  def create_mr(event)
+    MergeRequest.create(
+      iid: event[:iid],
+      actor: event[:actor],
+      occured_at: event[:occured_at]
+    )
+  end
 
-  # end
+  def create_event(event, mr)
+    Event.create(
+      merge_request_id: mr.id,
+      event_type: event[:event]
+    )
+  end
+
+  def merge_request(event)
+    puts "this event iid #{event[:iid]}"
+    jo = MergeRequest.find_by({ iid: event[:iid] })
+  end
 
   def api_call(uri)
     req = Net::HTTP::Get.new(uri)
