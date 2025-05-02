@@ -33,8 +33,12 @@ binding.pry
 
   def save_events(project_id, iid)
    events = merge_requests_events(project_id, iid)
-   binding.pry
+
+    # 1)for example 1 (69360696, 1) I get an array in a array [[xxx]] event tho
+    # open event in merge_request_events is a normal array
     flat_events = events.flatten
+   # in used flatten to remove a [] layer an use the array in the for loop
+   # it works and I am able to create the mr and the event here under
    for event in flat_events do
     if event[:event] == "OpenedEvent"
       create_mr(event)
@@ -43,6 +47,11 @@ binding.pry
     end
    end
   end
+
+  # my problem is that when I go to the second example (69360696, 2)
+  # and binding.pry under events = merge_requests_events(project_id, iid) here above
+  # I get that events is nil event tho open array in merge_request_event is normal
+  # I did not check is event exist yet but will do asap. I hope I make sense
 
   def create_mr(event)
     MergeRequest.create(
