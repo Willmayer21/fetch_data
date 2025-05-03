@@ -45,6 +45,7 @@ class MyApiController < ApplicationController
    # in used flatten to remove a [] layer an use the array in the for loop
    # it works and I am able to create the mr and the event here under
    for event in flat_events do
+    return if find_event(event)
     if event[:event] == "OpenedEvent"
       create_mr(event)
       mr = find_merge_request(event)
@@ -87,7 +88,7 @@ class MyApiController < ApplicationController
   end
 
   def find_event(event)
-    MergeRequest.find_by({ iid: event[:iid], occured_at: event[:occured_at] })
+    Event.find_by({ iid: event[:iid], occured_at: event[:occured_at] })
   end
 
   def find_merge_request(event)
