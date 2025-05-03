@@ -10,12 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_03_065303) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_03_080322) do
   create_table "events", force: :cascade do |t|
     t.integer "merge_request_id"
     t.string "event_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "iid"
+    t.string "actor"
+    t.datetime "occured_at"
     t.index ["merge_request_id"], name: "index_events_on_merge_request_id"
   end
 

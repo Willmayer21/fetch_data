@@ -14,9 +14,7 @@ class MyApiController < ApplicationController
         event: "OpenedEvent",
         state: "Open"
       })
-
     uri_resource_state_events = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}/resource_state_events")
-    binding.pry
     api_response_events = api_call(uri_resource_state_events)
 
     if api_response_events.count > 1
@@ -33,7 +31,7 @@ class MyApiController < ApplicationController
         })
       end
     end
-binding.pry
+
     open_event
   end
 
@@ -51,7 +49,7 @@ binding.pry
       create_mr(event)
       mr = find_merge_request(event)
       create_event(event, mr)
-    elsif event[:event] == "ClosedEvent"
+    elsif event[:event] == "ClosedEvent" || event[:event] == "MergedEvent"
       mr = update_mr(event)
       create_event(event, mr)
     end
@@ -64,8 +62,9 @@ binding.pry
   # I did not check is event exist yet but will do asap. I hope I make sense
 
   def update_mr(event)
-    mr = MergeRequest.find_by({ iid: event[:iid], occured_at: event[occured_at] })
-    mr.update({ state: event[state] })
+    mr = find_merge_request(event)
+    mr.update({ state: event[:state] })
+    mr
   end
 
   def create_mr(event)
@@ -80,13 +79,19 @@ binding.pry
   def create_event(event, mr)
     Event.create(
       merge_request_id: mr.id,
-      event_type: event[:event]
+      event_type: event[:event],
+      actor: event[:actor],
+      iid: event[:iid],
+      occured_at: event[:occured_at]
     )
   end
 
+  def find_event(event)
+    MergeRequest.find_by({ iid: event[:iid], occured_at: event[:occured_at] })
+  end
+
   def find_merge_request(event)
-    puts "this event iid #{event[:iid]}"
-    jo = MergeRequest.find_by({ iid: event[:iid] })
+    MergeRequest.find_by({ iid: event[:iid] })
   end
 
   def api_call(uri)
