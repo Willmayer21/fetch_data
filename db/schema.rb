@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_02_072008) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_03_065303) do
   create_table "events", force: :cascade do |t|
     t.integer "merge_request_id"
     t.string "event_type"
@@ -25,6 +25,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_072008) do
     t.integer "iid"
     t.datetime "occured_at"
     t.string "actor"
+    t.string "state"
   end
 
   add_foreign_key "events", "merge_requests"
