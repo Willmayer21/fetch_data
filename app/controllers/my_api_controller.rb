@@ -12,7 +12,8 @@ class MyApiController < ApplicationController
         occured_at: api_response["created_at"],
         actor: api_response["author"]["name"],
         event: "OpenedEvent",
-        state: "Open"
+        state: "Open",
+        project_id: api_response["project_id"]
       })
     uri_resource_state_events = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}/resource_state_events")
     api_response_events = api_call(uri_resource_state_events)
@@ -23,6 +24,7 @@ class MyApiController < ApplicationController
       api_response_events.map do |el|
         open_event.push(
         {
+          project_id: api_response["project_id"],
           iid: api_response["iid"],
           occured_at: el["created_at"],
           actor: el["user"]["name"],
@@ -31,7 +33,6 @@ class MyApiController < ApplicationController
         })
       end
     end
-
     open_event
   end
 
@@ -73,13 +74,15 @@ class MyApiController < ApplicationController
       iid: event[:iid],
       actor: event[:actor],
       occured_at: event[:occured_at],
-      state: "mr open"
+      state: "mr open",
+      project_id: event[:project_id]
     )
   end
 
   def create_event(event, mr)
     Event.create(
       merge_request_id: mr.id,
+      project_id: mr.project_id,
       event_type: event[:event],
       actor: event[:actor],
       iid: event[:iid],
@@ -92,7 +95,7 @@ class MyApiController < ApplicationController
   end
 
   def find_merge_request(event)
-    MergeRequest.find_by({ iid: event[:iid] })
+    MergeRequest.find_by({ iid: event[:iid], project_id: event[:project_id] })
   end
 
   def api_call(uri)
@@ -103,7 +106,14 @@ class MyApiController < ApplicationController
     end
     JSON.parse(res.body)
   end
+
+
+  def sync_merge_request
+    data = save_events(params["project_id"], params["iid"])
+    render json: data
+  end
 end
+
 
 
 # 69360696

@@ -21,4 +21,5 @@ Rails.application.routes.draw do
   get "api/fetch_project_pull_request", to: "api#fetch_project_pull_request"
   get "api/fetch_pull_request_event", to: "api#fetch_pull_request_event"
   get "my_api/merge_requests", to: "my_api#merge_requests"
+  get "my_api/sync_merge_request", to: "my_api#sync_merge_request"
 end
