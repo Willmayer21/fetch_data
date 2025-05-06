@@ -4,17 +4,17 @@ class ApiController < ApplicationController
 class NoValidInput < StandardError; end
 
   def index
-    render json: jo
+    render json: { success: "succes" }
   end
 
-def fetch_pull_request_event
-  # uri = URI("https://gitlab.com/api/v4/projects/69360696/merge_requests/3/resource_state_events")
-  uri = URI("https://gitlab.com/api/v4/projects/69360696/merge_requests/3")
+  def fetch_pull_request_event
+    # uri = URI("https://gitlab.com/api/v4/projects/69360696/merge_requests/3/resource_state_events")
+    uri = URI("https://gitlab.com/api/v4/projects/69360696/merge_requests/3")
 
-  call_result = api_call(uri)
+    call_result = api_call(uri)
 
-  render json: call_result
-end
+    render json: call_result
+  end
 
   def fetch_project
     if params["id"].nil? && params["name"].nil?

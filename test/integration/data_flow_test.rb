@@ -28,8 +28,7 @@ class DataFlowTest < ActionDispatch::IntegrationTest
       actor: "Will Mayer",
       project_id: 69360696
     }
-    MergeRequest.delete_all
-    Event.delete_all
+
     VCR.use_cassette(method_name) do
       assert_difference("MergeRequest.count", 1) do
         assert_difference("Event.count", 2) do
@@ -37,7 +36,6 @@ class DataFlowTest < ActionDispatch::IntegrationTest
           events = jo.save_events(69360696, 1)
         end
       end
-      binding.pry
       result_mr = MergeRequest.find_by({ iid: 1, project_id: 69360696 })
       result_events = Event.where({ iid: result_mr.iid, project_id: result_mr.project_id })
       assert_record(result_mr, mr_expectation)
@@ -62,8 +60,7 @@ class DataFlowTest < ActionDispatch::IntegrationTest
       actor: "Will Mayer",
       project_id: 69360696
     }
-    MergeRequest.delete_all
-    Event.delete_all
+
     VCR.use_cassette(method_name) do
       assert_difference("MergeRequest.count", 1) do
         assert_difference("Event.count", 1) do
@@ -71,7 +68,6 @@ class DataFlowTest < ActionDispatch::IntegrationTest
           events = jo.save_events(69360696, 2)
         end
       end
-      binding.pry
       result_mr = MergeRequest.find_by({ iid: 2, project_id: 69360696 })
       result_events = Event.find_by({ iid: result_mr.iid, project_id: result_mr.project_id })
       assert_record(result_mr, mr_expectation)
@@ -103,8 +99,7 @@ class DataFlowTest < ActionDispatch::IntegrationTest
       actor: "Will Mayer",
       project_id: 69360696
     }
-    MergeRequest.delete_all
-    Event.delete_all
+
     VCR.use_cassette(method_name) do
       assert_difference("MergeRequest.count", 1) do
         assert_difference("Event.count", 2) do
@@ -112,12 +107,27 @@ class DataFlowTest < ActionDispatch::IntegrationTest
           events = jo.save_events(69360696, 3)
         end
       end
-      binding.pry
       result_mr = MergeRequest.find_by({ iid: 3, project_id: 69360696 })
       result_events = Event.where({ iid: result_mr.iid, project_id: result_mr.project_id })
       assert_record(result_mr, mr_expectation)
       assert_record(result_events[0], events_expectation_1)
       assert_record(result_events[1], events_expectation_2)
     end
+  end
+
+  test "creation of notes and events" do
+    VCR.use_cassette(method_name) do
+      assert_difference("MergeRequest.count", 1) do
+        assert_difference("Event.count", 6) do
+          jo = MyApiController.new
+          events = jo.save_events(69360696, 2)
+        end
+      end
+    end
+    result_mr = MergeRequest.find_by({ iid: 2, project_id: 69360696 })
+    result_events = Event.where({ iid: result_mr.iid, project_id: result_mr.project_id })
+    # assert_record(result_mr, mr_expectation)
+    # assert_record(result_events[0], events_expectation_1)
+    # assert_record(result_events[1], events_expectation_2)
   end
 end

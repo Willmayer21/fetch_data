@@ -2,6 +2,29 @@ require "net/http"
 
 class MyApiController < ApplicationController
   class ArrayCountOver1 < StandardError; end
+
+  def merge_request_notes(project_id, iid)
+    uri_merge_requests = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}")
+    api_response = api_call(uri_merge_requests)
+    uri_merge_requests_notes = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}/notes")
+    api_response_notes = api_call(uri_merge_requests_notes)
+    note_event = []
+    api_response_notes.each do |note|
+     note_event.push(
+      {
+        project_id: api_response["project_id"],
+        iid: api_response["iid"],
+        event: "NoteEvent",
+        body: note["body"],
+        note_id: note["id"],
+        author: note["author"]["name"],
+        created_at: note["created_at"]
+      }
+     )
+    end
+    note_event
+  end
+
   def merge_requests_events(project_id, iid)
     uri_merge_requests = URI("https://gitlab.com/api/v4/projects/#{project_id}/merge_requests/#{iid}")
     api_response = api_call(uri_merge_requests)
@@ -38,13 +61,9 @@ class MyApiController < ApplicationController
 
   def save_events(project_id, iid)
    events = merge_requests_events(project_id, iid)
-
-    # 1)for example 1 (69360696, 1) I get an array in a array [[xxx]] event tho
-    # open event in merge_request_events is a normal array
-    flat_events = events.flatten
-
-   # in used flatten to remove a [] layer an use the array in the for loop
-   # it works and I am able to create the mr and the event here under
+   notes = merge_request_notes(project_id, iid)
+   events.push(notes)
+   flat_events = events.flatten
    for event in flat_events do
     return if find_event(event)
     if event[:event] == "OpenedEvent"
@@ -54,19 +73,30 @@ class MyApiController < ApplicationController
     elsif event[:event] == "ClosedEvent" || event[:event] == "MergedEvent"
       mr = update_mr(event)
       create_event(event, mr)
+    elsif event[:event] == "NoteEvent"
+      mr = find_merge_request(event)
+      note = create_note(event, mr)
+      create_note_event(event, mr, note)
     end
    end
   end
-
-  # my problem is that when I go to the second example (69360696, 2)
-  # and binding.pry under events = merge_requests_events(project_id, iid) here above
-  # I get that events is nil event tho open array in merge_request_event is normal
-  # I did not check is event exist yet but will do asap. I hope I make sense
 
   def update_mr(event)
     mr = find_merge_request(event)
     mr.update({ state: event[:state] })
     mr
+  end
+
+  def create_note(event, mr)
+    Note.create(
+      merge_request_id: mr.id,
+      project_id: mr.project_id,
+      iid: event[:iid],
+      event: event[:event],
+      body: event[:body],
+      author: event[:author],
+      occured_at: event[:created_at]
+    )
   end
 
   def create_mr(event)
@@ -76,6 +106,18 @@ class MyApiController < ApplicationController
       occured_at: event[:occured_at],
       state: "mr open",
       project_id: event[:project_id]
+    )
+  end
+
+  def create_note_event(event, mr, note)
+    Event.create(
+      note_id: note.id,
+      merge_request_id: mr.id,
+      project_id: mr.project_id,
+      event_type: event[:event],
+      actor: event[:actor],
+      iid: event[:iid],
+      occured_at: event[:occured_at]
     )
   end
 
@@ -91,7 +133,7 @@ class MyApiController < ApplicationController
   end
 
   def find_event(event)
-    Event.find_by({ iid: event[:iid], occured_at: event[:occured_at] })
+    Event.find_by({ iid: event[:iid], occured_at: event[:occured_at], note_id: event[:note_id] })
   end
 
   def find_merge_request(event)
@@ -107,13 +149,8 @@ class MyApiController < ApplicationController
     JSON.parse(res.body)
   end
 
-
   def sync_merge_request
     data = save_events(params["project_id"], params["iid"])
     render json: data
   end
 end
-
-
-
-# 69360696
