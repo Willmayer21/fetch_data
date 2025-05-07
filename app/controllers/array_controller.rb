@@ -95,43 +95,39 @@ class ArrayController < ApplicationController
 
       all_array = []
 
-reviews.each do |review|
-  status = []
-  remote_node_text = []
-  comment_remote_node_id = []
-  remote_node_id = []
+      reviews.each do |review|
+        status = []
+        remote_node_text = []
+        comment_remote_node_id = []
+        remote_node_id = []
 
-  review.each do |note|
-    remote_node_id.push(note[:id][/\d+$/])
-    puts "REMOTE_NODE_ID #{remote_node_id}"
-    if note[:body] == "approved this merge request"
-      status = "approved"
-    elsif note[:body] == "left review comments"
-      status = "commented"
-    elsif note[:id].include?("DiffNote")
-      remote_node_text = note[:body]
-      comment_remote_node_id = note[:id][/\d+$/]
+        review.each do |note|
+          remote_node_id.push(note[:id][/\d+$/])
+          if note[:body] == "approved this merge request"
+            status = "approved"
+          elsif note[:body] == "left review comments"
+            status = "commented"
+          elsif note[:id].include?("DiffNote")
+            remote_node_text = note[:body]
+            comment_remote_node_id = note[:id][/\d+$/]
 
-    end
-  end
+          end
+        end
 
-  puts "222222222222222"
-  all_array.push(
-    {
-      status: status,
-      remote_node_id: "#{remote_node_id.first}--#{remote_node_id.last}",
-      review_comments: [ {
-        remote_node_id: comment_remote_node_id,
-        remote_node_text: remote_node_text
-      } ]
-    }
-  )
-end
+        all_array.push(
+          {
+            status: status,
+            remote_node_id: "#{remote_node_id.first}--#{remote_node_id.last}",
+            review_comments: [ {
+              remote_node_id: comment_remote_node_id,
+              remote_node_text: remote_node_text
+            } ]
+          }
+        )
+      end
 
-puts "++++++"
-puts all_array
-puts "+++++++"
-
-binding.pry
+      puts "++++++"
+      puts all_array
+      puts "+++++++"
   end
 end
