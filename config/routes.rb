@@ -22,4 +22,7 @@ Rails.application.routes.draw do
   get "api/fetch_pull_request_event", to: "api#fetch_pull_request_event"
   get "my_api/merge_requests", to: "my_api#merge_requests"
   get "my_api/sync_merge_request", to: "my_api#sync_merge_request"
+  get "array/index", to: "array#index"
+  get "array_updated/index", to: "array_updated#index"
+   get "array_free/index", to: "array_free#index"
 end
